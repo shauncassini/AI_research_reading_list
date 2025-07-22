@@ -1,0 +1,154 @@
+% ========================================================================
+% readinglist.sty -- LaTeX style for structured research paper notes
+% Author: Shaun Cassini
+% Date: 2025-07-22
+%
+% This package provides a clean, reusable framework for maintaining a
+% research paper reading list with structured fields for notes.
+%
+% Usage:
+%   \usepackage{readinglist}
+%   \addbibresource{papers.bib}
+%   \paperentry[status={...}, summary={...}, ...]{bibkey}
+%
+% Automatically:
+% - Pulls title, authors, year, and URL from your .bib file.
+% - Lets you annotate key fields (summary, methods, datasets, etc.).
+% - Displays "(Missing)" when fields are not filled.
+% - Produces a clean, compact layout for each paper.
+% ========================================================================
+
+\ProvidesPackage{readinglist}[2025/07/22 Research Paper Notes Template]
+
+% Required packages
+\RequirePackage[a4paper, margin=1in]{geometry}   % Page size and margins
+\RequirePackage{titlesec}                        % Title formatting
+\RequirePackage{enumitem}                        % Custom lists
+\RequirePackage{hyperref}                        % Clickable links
+\RequirePackage{xkeyval}                         % Key-value arguments
+\RequirePackage[backend=biber,style=ieee]{biblatex} % IEEE-style references
+
+% ------------------------------------------------------------------------
+% Table of Contents
+% ------------------------------------------------------------------------
+% Only include sections (paper titles) in the TOC (no subsections)
+\setcounter{tocdepth}{1}
+
+% Rename TOC header
+\renewcommand{\contentsname}{Papers}
+
+% ------------------------------------------------------------------------
+% Section and Subsection Formatting
+% ------------------------------------------------------------------------
+% Compact paper titles (sections), unnumbered, with a rule beneath
+\titleformat{\section}{\normalsize\bfseries}{}{0em}{}[\titlerule]
+\titlespacing*{\section}{0pt}{0.5em}{0.5em}
+
+% Smaller subsections for fields (not numbered)
+\titleformat{\subsection}{\small\bfseries}{}{0em}{}[]
+\setcounter{secnumdepth}{0}
+
+% ------------------------------------------------------------------------
+% Default placeholders for all fields (displayed if missing)
+% ------------------------------------------------------------------------
+\newcommand{\paper@status}{}
+\newcommand{\paper@summary}{}
+\newcommand{\paper@contrib}{}
+\newcommand{\paper@methods}{}
+\newcommand{\paper@impl}{}
+\newcommand{\paper@datasets}{}
+\newcommand{\paper@strengths}{}
+\newcommand{\paper@relations}{}
+\newcommand{\paper@notes}{}
+
+% ------------------------------------------------------------------------
+% Key Definitions (handle dynamic values and line breaks)
+% ------------------------------------------------------------------------
+\makeatletter
+% Add a line break only when actual content is provided
+\define@key{paper}{status}{\def\paper@status{#1}}
+\define@key{paper}{summary}{\def\paper@summary{\\[4pt]#1}}
+\define@key{paper}{methods}{\def\paper@methods{\\[4pt]#1}}
+\define@key{paper}{implementation}{\def\paper@impl{\\[4pt]#1}}
+\define@key{paper}{datasets}{\def\paper@datasets{\\[4pt]#1}}
+\define@key{paper}{strengths}{\def\paper@strengths{\\[4pt]#1}}
+\define@key{paper}{relations}{\def\paper@relations{\\[4pt]#1}}
+\define@key{paper}{notes}{\def\paper@notes{\\[4pt]#1}}
+
+% Contributions: auto-wrap in a bullet list only if populated
+\define@key{paper}{contributions}{%
+  \def\paper@contrib{\begin{itemize}[leftmargin=*]#1\end{itemize}}%
+}
+
+% ------------------------------------------------------------------------
+% Field Printing Helper
+% ------------------------------------------------------------------------
+% Renders a field label and value, with consistent vertical spacing.
+% If a field is missing, shows "(Missing)" inline.
+\newcommand{\printfield}[2]{%
+  \noindent\textbf{#1:} #2 \par\vspace{12pt}%
+}
+
+% ------------------------------------------------------------------------
+% Main Paper Entry Macro
+% ------------------------------------------------------------------------
+% Usage: \paperentry[key1={val1}, key2={val2}, ...]{bibkey}
+% Keys: status, summary, contributions, methods, implementation,
+%       datasets, strengths, relations, interview
+% Automatically includes metadata from the .bib file.
+\newcommand{\paperentry}[2][]{%
+  % Reset defaults for every entry (avoid values leaking between entries)
+  \renewcommand{\paper@status}{(Missing)}
+  \renewcommand{\paper@summary}{(Missing)}
+  \renewcommand{\paper@contrib}{(Missing)}
+  \renewcommand{\paper@methods}{(Missing)}
+  \renewcommand{\paper@impl}{(Missing)}
+  \renewcommand{\paper@datasets}{(Missing)}
+  \renewcommand{\paper@strengths}{(Missing)}
+  \renewcommand{\paper@relations}{(Missing)}
+  \renewcommand{\paper@notes}{(Missing)}
+
+  % Apply user-specified key-value fields
+  \setkeys{paper}{#1}%
+
+  % Paper title (from BibTeX) + inline citation
+  \section{\texorpdfstring{\citetitle{#2} \cite{#2}}{#2}}
+
+  % Compact metadata block (no big spacing)
+  \textbf{Authors:} \citeauthor{#2} \\
+  \textbf{Year:} \citeyear{#2} \\
+  \textbf{Link:} \citeurl{#2} \\
+  \textbf{Status:} \paper@status \\[6pt]
+
+  % Annotated fields (show "(Missing)" if not provided)
+  \printfield{One-Line Summary}{\paper@summary}
+  \printfield{Key Contributions}{\paper@contrib}
+  \printfield{Key Methods / Architecture Details}{\paper@methods}
+  \printfield{Implementation}{\paper@impl}
+  \printfield{Datasets Used}{\paper@datasets}
+  \printfield{Strengths and Limitations}{\paper@strengths}
+  \printfield{Relation to Other Work}{\paper@relations}
+  \printfield{Applications / Notes}{\paper@notes}
+
+  \newpage
+}
+\makeatother
+
+% ------------------------------------------------------------------------
+% Title Page Redefinition (Compact)
+% ------------------------------------------------------------------------
+% Produces a minimalist title block with no page break before TOC.
+\makeatletter
+\renewcommand{\maketitle}{%
+  \begin{center}
+    {\LARGE\bfseries \@title \par}
+    \vskip 0.5em
+    {\large \@author \par}
+    \vskip 0.5em
+    \ifx\@date\@empty\else
+      {\small \@date \par}
+    \fi
+    \vskip 1em
+  \end{center}
+}
+\makeatother

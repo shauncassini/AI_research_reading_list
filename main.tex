@@ -1,0 +1,57 @@
+\documentclass[12pt]{article}
+
+% Load the custom style
+\usepackage{readinglist}
+
+% Link to your BibTeX file
+\addbibresource{papers.bib}
+
+% Title page info
+\title{AI Research Reading List}
+\author{Shaun Cassini}
+\date{\today}
+
+\begin{document}
+
+% Title + TOC
+\maketitle
+\tableofcontents
+\newpage
+
+% ------------------------------------------------------------------------
+% Demo Entries (edit or duplicate as needed)
+% ------------------------------------------------------------------------
+
+\paperentry[
+  status={Read, Understood (conceptually)},
+  summary={Introduced the Transformer, replacing RNNs with self-attention.},
+  contributions={\item Multi-head self-attention and positional encoding.
+                 \item Removed recurrence for parallelism.
+                 \item Achieved state-of-the-art results in machine translation.},
+  methods={Encoder-decoder Transformer with scaled dot-product attention and feed-forward layers.},
+  implementation={Official TensorFlow repo; PyTorch ports widely available. Watch for masking logic.},
+  datasets={WMT 2014 English–German and English–French translation benchmarks.},
+  strengths={Highly parallelizable, but quadratic complexity in sequence length.},
+  relations={Foundation for GPT, BERT, and nearly all modern LLMs.},
+  notes={Be ready to explain why self-attention scales better than RNNs.}
+]{vaswani2017attention}
+
+\paperentry[
+  status={Read, Discussed, TODO: Replication},
+  summary={Bidirectional Transformer pre-trained using MLM and NSP for transfer learning.},
+  contributions={\item Pioneered large-scale pretraining for NLP.
+                 \item Introduced Masked Language Modeling (MLM) and Next Sentence Prediction (NSP).
+                 \item Fine-tuning paradigm for downstream NLP tasks.},
+  methods={12- and 24-layer Transformer encoder (BERT-Base, BERT-Large).},
+  implementation={Official TensorFlow implementation; HuggUseding Face version standard. NSP often skipped in later work.},
+  % datasets={BooksCorpus and English Wikipedia (3.3B words).}, % Example missing entry
+  strengths={Powerful contextual representations, but very expensive to train.},
+  relations={Led to RoBERTa, ALBERT, and spurred GPT-style autoregressive models.},
+  notes={Understand pros and cons of bidirectional vs autoregressive modeling.}
+]{devlin2018bert}
+
+% Print references at the end
+\newpage
+\printbibliography
+
+\end{document}
